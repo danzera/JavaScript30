@@ -58,7 +58,47 @@
   <audio data-key="76" src="sounds/tink.wav"></audio>
 
 <script>
+  // that gives us the event (e) -- 'e' is just an objec
+  // full of data describing the 'keydown event'
+  function playSound(e) {
+    // console.log(e); // log the whole set of event data
+    // console.log(e.keyCode); // only logs the corresponding keyCode
+    // cross-check the key pressed with our audio elems (above)
+    const audio = document.querySelector(`audio[data-key="${e.keyCode}"]`);
+    // cross-check the key pressed with our class "key" elems so we can apply CSS
+    const key = document.querySelector(`.key[data-key="${e.keyCode}"]`);
+    if (!audio) return; // exit function for non-audio keys
+    // console.log(audio); // logs 'audio' information (or null if not a data-key)
+    // console.log(key); // logs 'key' information
+    audio.currentTime = 0;
+    audio.play();
+    key.classList.add('playing'); // adds CSS class 'playing' to the key that was pressed
+  }
 
+  function removeTransition(e) {
+    // the following line prevents all TransitionEvents from being acknowledged
+    // without the following line, 6 TransitionEvents would be acknowledged
+    // one for each border (4), one for the 'transform' property and one for
+    // the box-shadow property (all under the .playing CSS class)
+    if (e.propertyName !== 'transform') return;
+    // console.log(e); // will only log the 'transform' TransitionEvent
+    // console.log(e.propertyName); // only logs the propertName of the TransitionEvent
+    // next line shows us with 'this' is referring to currently
+    // console.log(this); // which is currently the 'key' div for the key that was pressed
+    // using 'this.' we can remove the CSS class of 'playing' from the 'key' elem
+    // for the key that was pressed, once the 'transitionend' TransitionEvent has finished
+    this.classList.remove('playing');
+  }
+
+  const keys = document.querySelectorAll('.key'); // gives us an array of our 'key' divs (9 elems)
+  // now we need to add an eventListener TO EACH 'key' elem
+  // to see if 'transitioned' occurs
+  // if so, we will remove the transition using our removeTransition function (above)
+  // (revert the 'key' div back to its original state before adding the yellow border)
+  keys.forEach(key => key.addEventListener('transitionend', removeTransition));
+  // addEventListener that listens for a 'keydown' event
+  // when one occurs, it will run the playSound() function
+  window.addEventListener('keydown', playSound);
 </script>
 
 
